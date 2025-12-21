@@ -1,4 +1,4 @@
-from Domain.Module.Chambre import Chambre
+from Domain.Chambre import Chambre
 from DTO.RequestDtoChambre import RequestDtoChambre
 from DTO.ResponseDtoChambre import ResponseDtoChambre
 
