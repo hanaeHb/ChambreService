@@ -1,0 +1,4 @@
+# INSTALLE PYTHON
+# INSTALLER MONGODB
+# INSTALLER SWAGGER:
+pip install flask-restx
