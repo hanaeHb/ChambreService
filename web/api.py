@@ -1,9 +1,28 @@
 from flask import Flask, request
+from config.security import require_role
 from flask_restx import Api, Resource, fields
 from db import chambres_collection
 
 app = Flask(__name__)
-api = Api(app, version="1.0", title="Chambre API", description="API gestion des chambres")
+
+# Config Swagger avec JWT Bearer
+authorizations = {
+    'Bearer Auth': {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'Authorization',
+        'description': 'Bearer <JWT token>'
+    }
+}
+
+api = Api(
+    app,
+    version="1.0",
+    title="Chambre API",
+    description="API gestion des chambres",
+    authorizations=authorizations,
+    security='Bearer Auth'
+)
 
 # Modèle pour Swagger
 chambre_model = api.model('Chambre', {
@@ -31,8 +50,10 @@ class ChambreList(Resource):
 
     @ns.expect(chambre_model)
     @ns.marshal_with(chambre_model, code=201)
+    @api.doc(security='Bearer Auth')
+    @require_role("ADMIN")
     def post(self):
-        """Ajouter une chambre"""
+        """Ajouter une chambre (ADMIN seulement)"""
         data = request.json
         data["id"] = chambres_collection.count_documents({}) + 1
         result = chambres_collection.insert_one(data)
@@ -49,21 +70,27 @@ class Chambre(Resource):
             return chambre
         api.abort(404, "Chambre non trouvée")
 
+    @api.doc(security='Bearer Auth')
+    @require_role("ADMIN")
     def put(self, id):
-        """Mettre à jour une chambre"""
+        """Mettre à jour une chambre (ADMIN seulement)"""
         data = request.json
         chambres_collection.update_one({"id": id}, {"$set": data})
         return {"message": "Chambre updated"}, 200
 
+    @api.doc(security='Bearer Auth')
+    @require_role("ADMIN")
     def delete(self, id):
-        """Supprimer une chambre"""
+        """Supprimer une chambre (ADMIN seulement)"""
         chambres_collection.delete_one({"id": id})
         return {"message": "Chambre deleted"}, 200
 
 @ns.route('/<int:id>/etat')
 class ChambreEtat(Resource):
+    @api.doc(security='Bearer Auth')
+    @require_role("ADMIN")
     def patch(self, id):
-        """Changer l'état d'une chambre"""
+        """Changer l'état d'une chambre (ADMIN seulement)"""
         chambre = chambres_collection.find_one({"id": id})
         if not chambre:
             api.abort(404, "Chambre non trouvée")

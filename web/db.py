@@ -8,3 +8,5 @@ db = client["hotel_management"]
 
 # Collection chambres
 chambres_collection = db["chambres"]
+
+
