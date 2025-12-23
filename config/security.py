@@ -30,7 +30,6 @@ def require_role(required_role):
                     algorithms=["RS256"]
                 )
 
-                # نبحثو على role ف roles list
                 roles = payload.get("roles", [])
                 authorities = payload.get("authorities", "")
 
